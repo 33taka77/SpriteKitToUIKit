@@ -626,6 +626,26 @@ class MyScene: SKScene {
         self.removeChildrenInArray(removeImage)
     }
     
+    private func removeImageSprite(imageSprite:ImageSprite) {
+        var removeImage:[AnyObject] = []
+        let currentHeight = imageSprite.posotion.y + imageSprite.targetSize.height
+        if currentHeight > screenSize.height+200 || currentHeight < -200 {
+            if imageSprite.sprite != nil {
+                let (isExist:Bool,index:Int) = self.containObject(self.children, object: imageSprite.sprite)
+                if isExist == true {
+                    if index < imagesForDraw.count {
+                        removeImage.append(imageSprite.sprite)
+                        imageSprite.sprite = nil
+                        imagesForDraw.removeAtIndex(index)
+                        self.removeChildrenInArray(removeImage)
+                    }else{
+                        //println("error")
+                    }
+                }
+            }
+        }
+        
+    }
     private func boundAnimation( delta:CGFloat ) {
         scrollImageSprite(-delta,isBoundRequest: true)
     }
@@ -662,17 +682,22 @@ class MyScene: SKScene {
         }
         for imagesInSection in imageSpriteArray {
             for imageSprite in imagesInSection{
+                
                 imageSprite.posotion = CGPointMake(imageSprite.posotion.x, imageSprite.posotion.y+distance)
+                removeImageSprite(imageSprite)
                 if isBoundRequest == false {
-                    imageSprite.move()
+                    let isNewItem = imageSprite.move(-200, end: screenSize.height+300)
+                    if isNewItem == true {
+                        imagesForDraw.append(imageSprite)
+                    }
                 }else{
                     imageSprite.moveWithAnimation()
                 }
+                
             }
         }
         
-        removeImageSprite(-200, endHeight: screenSize.height+200)
-        //prepareImageSpriteToDraw(-200, endHeight: screenSize.height+200)
+        //removeImageSprite(-200, endHeight: screenSize.height+200)
         if isBound == true {
             boundAnimation(delta)
         }
